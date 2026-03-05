@@ -1,19 +1,60 @@
 from datetime import datetime
 import os
+import requests
 
 def generate_log(data):
-    # TODO: Implement log generation logic
+    if not isinstance(data, list):
+        print("Error: Data must be a list")
+        return False
+    
+    if len(data) == 0:
+        print("Error: Data list cannot be empty")
+        return False
+    
+    today = datetime.now().strftime("%Y%m%d")
+    filename = f"log_{today}.txt"
+    
+    try:
+        with open(filename, "w") as file:
+            for entry in data:
+                file.write(f"{entry}\n")
+        
+        print(f"✓ Log written to {filename}")
+        print(f"  Location: {os.path.abspath(filename)}")
+        print(f"  Entries: {len(data)}")
+        return True
+        
+    except Exception as e:
+        print(f"Error writing to file: {e}")
+        return False
 
-    # STEP 1: Validate input
-    # Hint: Check if data is a list
 
-    # STEP 2: Generate a filename with today's date (e.g., "log_20250408.txt")
-    # Hint: Use datetime.now().strftime("%Y%m%d")
+def fetch_api_data():
+    try:
+        response = requests.get("https://jsonplaceholder.typicode.com/posts/1")
+        if response.status_code == 200:
+            data = response.json()
+            return [
+                f"API Post Title: {data.get('title', 'No title')}",
+                f"API Post Body: {data.get('body', 'No body')[:50]}..."
+            ]
+    except:
+        return ["Failed to fetch API data"]
+    return []
 
-    # STEP 3: Write the log entries to a file using File I/O
-    # Use a with open() block and write each line from the data list
-    # Example: file.write(f"{entry}\n")
 
-    # STEP 4: Print a confirmation message with the filename
-
-    pass
+if __name__ == "__main__":
+    log_data = [
+        "User logged in",
+        "User updated profile",
+        "Report exported",
+        "Settings changed",
+        "File uploaded"
+    ]
+    
+    generate_log(log_data)
+    
+    print("\n--- Fetching API Data ---")
+    api_data = fetch_api_data()
+    if api_data:
+        generate_log(api_data)
